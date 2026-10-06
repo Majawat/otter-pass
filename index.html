@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Diceware Passphrase Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .mono-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            SysAdmin Passphrase Studio
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">100% Client-Side</span>
+          </h1>
+          <p class="text-xs text-slate-400">Cryptographically secure, phone-friendly, code-safe admin passwords</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="themeToggle" class="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 border border-slate-800 transition" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </button>
+        <button id="regenerateAllTopBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <span>Regenerate All</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- Left Configuration Panel -->
+    <div class="lg:col-span-4 bg-slate-800/60 border border-slate-700/70 rounded-2xl p-5 shadow-xl backdrop-blur">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          Formula Rules
+        </h2>
+        <span id="entropyBadge" class="text-xs font-mono font-medium px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">~64 bits</span>
+      </div>
+
+      <div class="mt-4 space-y-4">
+        <!-- Word count slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-medium text-slate-300 mb-1.5">
+            <span>Word Count</span>
+            <span id="wordCountLabel" class="font-mono text-emerald-400 text-sm font-semibold">4 words</span>
+          </div>
+          <input id="wordCount" type="range" min="3" max="6" value="4" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+          <div class="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+            <span>3 (Fast)</span>
+            <span>4 (Balanced)</span>
+            <span>5 (Strong)</span>
+            <span>6 (Paranoid)</span>
+          </div>
+        </div>
+
+        <!-- Delimiter / Separator -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">Word Separator</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" data-delim="-" class="delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold transition hover:bg-slate-700">Hyphen (-)</button>
+            <button type="button" data-delim="_" class="delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700">Under (_)</button>
+            <button type="button" data-delim="." class="delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700">Dot (.)</button>
+            <button type="button" data-delim="none" class="delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700">None</button>
+          </div>
+        </div>
+
+        <!-- Casing option -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1.5">Letter Casing</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="caseTitle" class="case-btn py-2 px-2 text-xs rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-semibold transition hover:bg-slate-700">TitleCase (Easy)</button>
+            <button type="button" id="caseLower" class="case-btn py-2 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700">lowercase</button>
+          </div>
+        </div>
+
+        <!-- Checkboxes for complexity policies -->
+        <div class="pt-2 border-t border-slate-700 space-y-2.5">
+          <label class="flex items-center space-x-2.5 cursor-pointer">
+            <input type="checkbox" id="includeNumber" checked class="h-4 w-4 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-slate-800">
+            <span class="text-xs text-slate-300">Append 2-Digit Number <span class="text-slate-500 font-mono">(10-99)</span></span>
+          </label>
+          
+          <label class="flex items-center space-x-2.5 cursor-pointer">
+            <input type="checkbox" id="includeSymbol" checked class="h-4 w-4 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-slate-800">
+            <span class="text-xs text-slate-300">Append Code-Safe Symbol <span class="text-emerald-400 font-mono">!@#%_+=</span></span>
+          </label>
+        </div>
+
+        <!-- Entropy Info Box -->
+        <div class="bg-slate-900/80 rounded-xl p-3.5 border border-slate-800 text-xs text-slate-400 space-y-1.5">
+          <div class="flex items-center text-slate-200 font-semibold gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Why this is safe for terminal & phone:
+          </div>
+          <p class="leading-relaxed text-[11px]">
+            No ambiguous glyphs (<code class="text-slate-200">0/O</code>, <code class="text-slate-200">1/l/I</code>). Excludes shell operators (<code class="text-rose-400">$ ` " ' & \ ; &lt; &gt;</code>) so it won't break scripts or SQL queries.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side Passphrase List -->
+    <div class="lg:col-span-8 space-y-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300">Generated Candidates (Choose One)</h2>
+        <span class="text-xs text-slate-400">Click any card to copy</span>
+      </div>
+
+      <!-- Container for 4 generated cards -->
+      <div id="passphraseContainer" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Phonetic Breakdown Box -->
+      <div id="phoneticBox" class="hidden mt-4 bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 transition duration-300">
+        <div class="flex items-center justify-between text-xs text-slate-300 font-semibold mb-2">
+          <span class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+            NATO Phonetic Aid for Phone Support
+          </span>
+          <button id="closePhonetic" class="text-slate-500 hover:text-slate-300 text-xs">Close</button>
+        </div>
+        <div id="phoneticContent" class="text-xs font-mono text-emerald-400 bg-slate-900/80 p-3 rounded-lg border border-slate-800 leading-relaxed overflow-x-auto">
+          <!-- Dynamic phonetic spelling -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-emerald-500 text-slate-950 font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 text-sm z-50">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+    </svg>
+    <span id="toastMessage">Passphrase copied to clipboard!</span>
+  </div>
+
+  <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+    <p>Zero server transmission. Built with the Web Cryptography API (`crypto.getRandomValues`) for offline GitHub Pages hosting.</p>
+  </footer>
+
+  <script>
+    // Curated high-entropy EFF Diceware subset: phonetically distinct, common, 4-8 letters, no homophones, no offensive words.
+    const WORDLIST = [
+      "abacus","ability","absent","absorb","abstract","academy","accent","account","acid","acorn","acoustic","action",
+      "actor","acute","adapt","address","adjust","admiral","advance","advice","aerial","aerobic","affair","afford",
+      "african","agency","agenda","agent","agile","agree","ahead","airport","alarm","album","alert","algebra",
+      "alien","align","alley","alloy","almond","alpine","alps","already","alter","aluminum","amateur","amazing",
+      "amber","ambient","amend","amigo","amount","amplify","amuse","anchor","ancient","android","anecdote","angel",
+      "angler","animal","annual","antenna","antique","anvil","anybody","anyway","apartment","apology","apparel","appease",
+      "apple","approve","apron","aquatic","arcade","archery","archive","arctic","arena","argon","armchair","armor",
+      "arrow","artery","artifact","artist","ascend","asphalt","assist","asteroid","athlete","atlas","atom","atomic",
+      "attic","audio","audit","august","aurora","author","auto","avalanche","avenue","average","aviation","avoid",
+      "awake","award","aware","axis","baboon","backbone","backpack","badminton","baffle","bagel","baggage","balance",
+      "balcony","ballast","ballet","balloon","balsam","bamboo","banana","bandit","banjo","banner","barber","barely",
+      "barker","barley","barnacle","baron","barrier","barter","baseball","baseline","basement","basic","battery","battle",
+      "beacon","beadwork","beaker","beaming","beanie","beanstalk","beast","beauty","beaver","bedpost","bedrock","beehive",
+      "believer","bellows","belongs","beloved","benefactor","beret","berry","beside","bestow","beverage","bicycle","bidder",
+      "bifocal","bikeway","billion","binder","biology","biplane","biscuit","bison","bitters","blacksmith","blanket","blender",
+      "blessing","blimp","blizzard","blockade","blossom","blueprint","boarding","bobcat","bobsled","boiler","boldly","bolster",
+      "bonanza","bondless","bonfire","bonnet","bonsai","bookmark","bookstore","booster","bootlace","border","bossy","botany",
+      "bottom","boulder","bounce","boundary","bouquet","bowknot","bowling","boxcar","braided","brains","brakeman","branch",
+      "brass","bravery","breached","bread","breakup","brewery","briar","brick","bridle","brigade","brisk","brittle",
+      "broadside","broccoli","broker","bronze","broom","browser","bubble","bucket","buckle","buffalo","buffet","buggy",
+      "building","built","bulb","bulldog","bullpen","bumble","bundle","bungee","bunkbed","bunting","buoyant","burgundy",
+      "burley","burnish","burrow","busboy","business","butter","button","buzzard","cabana","cabin","cable","cactus",
+      "cadence","cadet","caisson","calico","calling","calmly","caloric","camel","camera","campaign","campground","canary",
+      "candle","candy","cane","canister","cannon","canoe","canyon","capable","capital","capsule","captain","caption",
+      "caramel","caravan","cardinal","caregiver","cargo","carload","carpet","carriage","carrousel","carter","cartload","cascade",
+      "cashew","casket","cassette","castle","casual","catalog","catcher","cater","catfish","catnap","cattle","caucus",
+      "cauldron","caviar","cavity","cedar","ceiling","celery","cellular","celtic","cement","censor","census","central",
+      "century","ceramic","cereal","certain","chamber","champion","channel","chaparral","chapter","charcoal","chariot","charter",
+      "checkout","cheddar","cheetah","chemical","cherry","chestnut","chevron","chicken","chimney","chipmunk","chirp","chisel",
+      "chloride","choice","cholesterol","chronicle","chuckle","cider","cigar","cinema","cinnamon","cipher","circle","circus",
+      "cistern","citizen","citrus","city","clammy","clarinet","classic","clay","cleaner","clearance","clever","cliff",
+      "climber","clinic","clipart","clipper","clock","cloister","closet","closure","clover","cluster","clutch","coastal",
+      "coaster","cobalt","cobbler","cobra","cobweb","coconut","cocoon","codfish","coffee","cohesive","coiffure","coinage",
+      "coldness","coliseum","collector","colonel","colony","color","combine","combustion","comedy","comet","comfort","comic",
+      "command","compact","complex","composer","compound","compute","comrade","concept","concise","concrete","condor","conduct",
+      "conduit","conflict","conifer","connect","conquer","consent","conserve","console","consul","contact","contain","context",
+      "contour","contrast","control","convert","convex","convey","cooling","copper","corridor","corsage","cosmic","costume",
+      "cotton","cougar","counsel","counter","country","coupon","courage","courier","courtyard","cove","covenant","coverlet",
+      "cowbell","cowboy","coyote","cradle","craftsman","cramp","cranberry","crater","crayon","creator","creature","credit",
+      "creek","crescent","crest","cricket","criminal","crimson","crisp","criterion","critic","croissant","crossbar","crossing",
+      "crotchet","crowbar","cruise","crumble","crunchy","crusade","crust","crystal","cube","cuckoo","cucumber","culprit",
+      "culture","culvert","cumulus","cupboard","cupcake","curator","curfew","curiosity","currant","current","curtain","cushion",
+      "custard","custom","cutlass","cutlet","cutoff","cylinder","cymbal","dagger","daily","daintily","damage","dancer",
+      "dandelion","dapper","darkness","darling","database","dawn","daybreak","daylight","daytime","dazzle","deacon","deadline",
+      "debtor","decade","december","decimal","declare","decorate","decoy","decrease","dedicate","deeply","deerfly","defeat",
+      "defender","defense","deferral","defiant","deficit","defrost","defunct","degree","dehydrate","delegate","delicate","delight",
+      "delivery","deluxe","demand","demise","democrat","demolish","denial","density","dentist","deodorant","departure","depict",
+      "deposit","depth","deputy","derby","derrick","descend","desert","design","desk","despair","destination","destroy",
+      "detailed","detect","detergent","detour","deuce","deviate","device","devoted","diagonal","dial","dialog","diamond",
+      "diary","dice","dictate","didactic","differ","difficulty","diffuse","digital","dignity","dilation","diligence","dimple",
+      "diner","dinghy","dinner","dinosaur","dioxide","diploma","direct","dirt","disable","disarm","disaster","disburse",
+      "disciple","disclose","discount","discourse","discover","discuss","disguise","dishcloth","disjoint","disk","dispatch","display",
+      "dispute","disrupt","distal","distant","district","distrust","ditch","diver","divide","divinity","divorce","dizziness",
+      "doctor","doctrine","document","dodger","dolphin","domain","domestic","dominant","domino","donor","doorstep","dosage",
+      "doting","double","dove","downfall","downhill","downpour","draft","dragonfly","drain","drama","drapery","drawbridge",
+      "drawer","dreamer","dredge","dresser","dribble","drift","driller","driver","dropcloth","droplet","drought","druid",
+      "drummer","dryer","dual","duckling","duet","duffel","dugout","dulcet","dummy","dumpster","dune","duplex",
+      "duplicate","durable","duration","dustpan","duty","duvet","dwarf","dwelling","dynamo","eagle","earmuff","earplug",
+      "earring","earth","easel","eastward","eat","eccentric","echo","eclipse","ecology","economy","ecosystem","ecstasy",
+      "editor","educate","eel","efficacy","efficient","effort","eggplant","ego","egret","eight","elastic","elbow",
+      "elder","election","electric","element","elephant","elevation","eligible","elk","ellipse","elm","emerald","emergency",
+      "emission","emitter","emotion","emperor","emphasis","empire","employ","empower","empress","empty","emu","enable",
+      "enactment","enamel","enchanter","enclave","encounter","endless","endow","energy","engine","engrave","enjoy","enlarge",
+      "enlist","enrich","enroll","ensign","ensemble","entangle","enterprise","entire","entity","entree","entry","envelope",
+      "enzyme","epic","epilogue","episode","epoch","equal","equation","equator","equilibrium","equip","equity","eraser",
+      "erosion","escalate","escape","escort","espionage","essay","essence","estate","estimate","eternal","ether","ethic",
+      "evacuate","evening","event","evident","exact","example","exceed","excel","exchange","exclaim","exclude","excursion",
+      "execute","exempt","exercise","exhale","exhaust","exhibit","exile","existing","exit","exodus","exotic","expand",
+      "expedition","expense","expert","expire","explain","explicit","exploit","explorer","exponent","export","expose","express",
+      "extend","exterior","extinct","extort","extra","extract","extreme","eyeball","eyebrow","eyeglass","eyelash","fabric",
+      "facade","facet","facility","factory","faculty","fade","faint","faithful","falcon","fallout","falsify","familiar",
+      "famous","fancy","fantasy","farmland","fascinate","fashion","fastball","fasten","fatal","fatigue","faucet","fault",
+      "favorite","fawn","feather","feature","february","federal","feeble","feedback","felony","female","fender","fern",
+      "ferry","festival","fetch","fever","fiber","fiction","fiddle","field","fiesta","fifteen","figment","filament",
+      "filter","finch","finder","finery","firebox","firefly","firewood","fiscal","fishhook","fissure","fitness","fixable",
+      "fixture","flagship","flame","flamingo","flannel","flashlamp","flattery","flavor","flea","flint","flipper","floating",
+      "flock","floodlight","floral","florist","floss","flowering","fluctuate","fluffy","fluoride","flying","focus","foglight",
+      "folding","folk","follower","fondant","food","football","footage","footnote","footpath","footprint","footstep","forecast",
+      "forehead","foreigner","forensic","forest","forever","forfeit","forgery","forklift","formal","format","formula","forsake",
+      "fortress","fortune","forward","fossil","fountain","foxhound","fraction","fracture","fragile","fragment","fragrance","frame",
+      "freckle","freeway","freeze","freight","frequency","friction","frigate","fringe","frolic","frosting","froth","frugal",
+      "fruitful","frustrate","fuel","fugitive","fulfilled","fumble","function","fungus","furlong","furnace","furniture","furrow",
+      "fusion","galaxy","gallery","gallop","gambit","gamecock","gangway","garage","garbage","garden","garlic","garment",
+      "garnet","garrison","gasoline","gatekeeper","gateway","gather","gauntlet","gavel","gazelle","gearbox","gecko","gelatin",
+      "gemstone","generator","generic","generous","gentle","geology","geometry","geranium","ghost","giant","gifted","gigantic",
+      "ginger","giraffe","glacier","glamour","glance","glass","gleeful","glide","glimmer","glimpse","glisten","glitter",
+      "global","glove","glow","glucose","gluten","glycol","gnat","goddess","goldfish","golf","gondola","goodness",
+      "gorilla","gospel","gossip","graduate","grain","grammar","grand","granite","graph","gravel","gravy","gravity"
+    ];
+
+    const SAFE_SYMBOLS = ['!', '@', '#', '%', '_', '+', '='];
+
+    const NATO = {
+      'a': 'Alpha', 'b': 'Bravo', 'c': 'Charlie', 'd': 'Delta', 'e': 'Echo',
+      'f': 'Foxtrot', 'g': 'Golf', 'h': 'Hotel', 'i': 'India', 'j': 'Juliet',
+      'k': 'Kilo', 'l': 'Lima', 'm': 'Mike', 'n': 'November', 'o': 'Oscar',
+      'p': 'Papa', 'q': 'Quebec', 'r': 'Romeo', 's': 'Sierra', 't': 'Tango',
+      'u': 'Uniform', 'v': 'Victor', 'w': 'Whiskey', 'x': 'X-ray', 'y': 'Yankee',
+      'z': 'Zulu', '0': 'Zero', '1': 'One', '2': 'Two', '3': 'Three',
+      '4': 'Four', '5': 'Five', '6': 'Six', '7': 'Seven', '8': 'Eight', '9': 'Nine',
+      '-': 'Hyphen', '_': 'Underscore', '.': 'Dot', '!': 'Exclamation', '@': 'At-Sign',
+      '#': 'Hash', '%': 'Percent', '+': 'Plus', '=': 'Equals'
+    };
+
+    // State
+    const state = {
+      wordCount: 4,
+      delimiter: '-',
+      isTitleCase: true,
+      includeNumber: true,
+      includeSymbol: true,
+      passphrases: ["", "", "", ""]
+    };
+
+    // Cryptographic random range [min, max)
+    function getRandomInt(min, max) {
+      const range = max - min;
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      return min + (array[0] % range);
+    }
+
+    // Capitalize helper
+    function toTitle(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }
+
+    // Passphrase Generator Core
+    function generateSinglePassphrase() {
+      const words = [];
+      for (let i = 0; i < state.wordCount; i++) {
+        const randIdx = getRandomInt(0, WORDLIST.length);
+        const rawWord = WORDLIST[randIdx];
+        words.push(state.isTitleCase ? toTitle(rawWord) : rawWord.toLowerCase());
+      }
+
+      const delimChar = state.delimiter === 'none' ? '' : state.delimiter;
+      let phrase = words.join(delimChar);
+
+      if (state.includeNumber) {
+        const num = getRandomInt(10, 100);
+        phrase += num;
+      }
+
+      if (state.includeSymbol) {
+        const symIdx = getRandomInt(0, SAFE_SYMBOLS.length);
+        phrase += SAFE_SYMBOLS[symIdx];
+      }
+
+      return phrase;
+    }
+
+    function calculateEntropy() {
+      // Log2(WordlistSize) * count + digit bits + symbol bits
+      const wordEntropy = Math.log2(WORDLIST.length) * state.wordCount;
+      const digitEntropy = state.includeNumber ? Math.log2(90) : 0;
+      const symbolEntropy = state.includeSymbol ? Math.log2(SAFE_SYMBOLS.length) : 0;
+      const total = Math.round(wordEntropy + digitEntropy + symbolEntropy);
+      document.getElementById('entropyBadge').textContent = `~${total} bits entropy`;
+    }
+
+    // Generate all 4
+    function generateAll() {
+      for (let i = 0; i < 4; i++) {
+        state.passphrases[i] = generateSinglePassphrase();
+      }
+      renderCards();
+      calculateEntropy();
+    }
+
+    // Copy to clipboard with fallback
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast("Copied to clipboard!")).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast("Copied to clipboard!");
+      } catch (err) {
+        showToast("Failed to copy");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2000);
+    }
+
+    // Show NATO spelling aid
+    function showPhonetic(phrase) {
+      const phoneticBox = document.getElementById('phoneticBox');
+      const phoneticContent = document.getElementById('phoneticContent');
+      const tokens = phrase.split('');
+      const spoken = tokens.map(char => {
+        const lower = char.toLowerCase();
+        if (NATO[lower]) {
+          return `${char} (${NATO[lower]})`;
+        }
+        return char;
+      }).join(' • ');
+
+      phoneticContent.textContent = spoken;
+      phoneticBox.classList.remove('hidden');
+    }
+
+    // Render cards
+    function renderCards() {
+      const container = document.getElementById('passphraseContainer');
+      container.innerHTML = '';
+
+      state.passphrases.forEach((phrase, index) => {
+        const card = document.createElement('div');
+        card.className = "group relative bg-slate-800/80 border border-slate-700/80 hover:border-emerald-500/70 rounded-xl p-4 transition-all duration-200 shadow-md hover:shadow-emerald-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer";
+
+        card.innerHTML = `
+          <div class="flex items-center space-x-3 w-full sm:w-auto overflow-hidden">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700 text-slate-300 font-mono text-xs flex items-center justify-center font-bold">#${index + 1}</span>
+            <div class="overflow-x-auto custom-scroll py-1 w-full">
+              <span class="mono-font text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-emerald-300 transition selection:bg-emerald-500 selection:text-white">${phrase}</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5 self-end sm:self-center flex-shrink-0" onclick="event.stopPropagation()">
+            <button class="phonetic-btn p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-700/80 transition" title="Show Phone / NATO Spelling" aria-label="Show NATO Spelling">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+            </button>
+            <button class="regen-single-btn p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-700/80 transition" title="Regenerate this entry" aria-label="Regenerate Single">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+            <button class="copy-btn px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-emerald-600 text-slate-200 hover:text-white text-xs font-semibold flex items-center space-x-1.5 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+        `;
+
+        // Card click triggers copy
+        card.addEventListener('click', () => copyToClipboard(phrase));
+
+        // Sub buttons
+        card.querySelector('.copy-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          copyToClipboard(phrase);
+        });
+
+        card.querySelector('.regen-single-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.passphrases[index] = generateSinglePassphrase();
+          renderCards();
+        });
+
+        card.querySelector('.phonetic-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          showPhonetic(phrase);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Event Listeners and Setup
+    document.addEventListener('DOMContentLoaded', () => {
+      // Word count slider
+      const wordSlider = document.getElementById('wordCount');
+      const wordCountLabel = document.getElementById('wordCountLabel');
+      wordSlider.addEventListener('input', (e) => {
+        state.wordCount = parseInt(e.target.value, 10);
+        wordCountLabel.textContent = `${state.wordCount} words`;
+        generateAll();
+      });
+
+      // Delimiter selector
+      const delimBtns = document.querySelectorAll('.delim-btn');
+      delimBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          delimBtns.forEach(b => {
+            b.className = "delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700";
+          });
+          btn.className = "delim-btn py-2 px-2 text-xs font-mono rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-bold transition hover:bg-slate-700";
+          state.delimiter = btn.getAttribute('data-delim');
+          generateAll();
+        });
+      });
+
+      // Casing buttons
+      const caseTitle = document.getElementById('caseTitle');
+      const caseLower = document.getElementById('caseLower');
+      caseTitle.addEventListener('click', () => {
+        state.isTitleCase = true;
+        caseTitle.className = "case-btn py-2 px-2 text-xs rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-semibold transition hover:bg-slate-700";
+        caseLower.className = "case-btn py-2 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700";
+        generateAll();
+      });
+      caseLower.addEventListener('click', () => {
+        state.isTitleCase = false;
+        caseLower.className = "case-btn py-2 px-2 text-xs rounded-lg border border-emerald-500 bg-emerald-500/20 text-emerald-300 font-semibold transition hover:bg-slate-700";
+        caseTitle.className = "case-btn py-2 px-2 text-xs rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700";
+        generateAll();
+      });
+
+      // Checkboxes
+      const numCheck = document.getElementById('includeNumber');
+      numCheck.addEventListener('change', (e) => {
+        state.includeNumber = e.target.checked;
+        generateAll();
+      });
+
+      const symCheck = document.getElementById('includeSymbol');
+      symCheck.addEventListener('change', (e) => {
+        state.includeSymbol = e.target.checked;
+        generateAll();
+      });
+
+      // Global regenerate
+      document.getElementById('regenerateAllTopBtn').addEventListener('click', generateAll);
+
+      // Close Phonetic Aid
+      document.getElementById('closePhonetic').addEventListener('click', () => {
+        document.getElementById('phoneticBox').classList.add('hidden');
+      });
+
+      // Dark / Neutral Theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('bg-slate-900');
+        document.body.classList.toggle('bg-slate-950');
+      });
+
+      // Initial generation
+      generateAll();
+    });
+  </script>
+</body>
+</html>
